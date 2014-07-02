@@ -359,10 +359,11 @@ class Freemember
     {
         $data = array();
         
-        if (ee()->TMPL->fetch_param('allow_querystrings') == 'yes') {
-            $data['action'] = ee()->functions->create_url(ee()->uri->uri_string.'?'.$_SERVER['QUERY_STRING']);
-        } else {
-            $data['action'] = ee()->functions->create_url(ee()->uri->uri_string);
+        $data['action'] = ee()->functions->create_url(ee()->uri->uri_string);
+        
+        // persists $_GET vars if present
+        if ($data['query_string'] = $this->_get_query_string()) {
+            $data['action'] .='?'.$data['query_string'];
         }
 
         if (ee()->TMPL->fetch_param('secure_action') == 'yes') {
@@ -390,6 +391,24 @@ class Freemember
 
         return ee()->functions->form_declaration($data).
             ee()->TMPL->parse_variables(ee()->TMPL->tagdata, $this->tag_vars).'</form>';
+    }
+    
+    /**
+     * Check for presence of a querystring in the current URL
+     */
+    protected function _get_query_string()
+    {
+        if (isset($_SERVER['QUERY_STRING'])) {
+            $query_string = $_SERVER['QUERY_STRING'];
+        } else if (isset($_SERVER['REQUEST_URI']) && FALSE !== ($pos = strpos($_SERVER['REQUEST_URI'], '?'))) {
+            $query_string = substr($_SERVER['REQUEST_URI'], $pos + 1);
+        } else if ($_GET) {
+            $query_string = http_build_query($_GET);
+        } else {
+            $query_string = FALSE;
+        }
+        
+        return $query_string;
     }
 
     /**
