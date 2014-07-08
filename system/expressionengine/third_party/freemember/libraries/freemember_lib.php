@@ -454,6 +454,23 @@ class Freemember_lib
                 ee()->form_validation->add_rules($field, "lang:$field", $rules);
             }
         }
+        
+        // disallow submission if there are fields not in the allow="" or require="" params
+        if ($this->form_param('allow')) {
+            $allow_fields = explode('|', $this->form_param('allow'));
+            foreach (ee()->freemember_model->member_custom_fields() as $field) {
+                if ((ee()->input->post($field->m_field_name))
+                    AND ( ! in_array($field->m_field_name, $allow_fields))
+                    AND ( ! in_array($field->m_field_name, $require_fields))
+                    ) {
+                    // Logs a specific error to the developer log for the developer
+                    ee()->load->library('logger');
+                    ee()->logger->developer(lang('fm_disallowed_log').' ('.$field->m_field_name.').');
+                    // Returns a non specific error to the user
+                    return ee()->output->show_user_error('general', array(lang('fm_disallowed')));
+                }
+            }
+        }
 
         // required if submitted (can't be set to empty string)
         foreach (array('email', 'email_confirm', 'username', 'screen_name') as $field) {
