@@ -10,4 +10,6 @@ $lang = array(
     'invalid_email' => 'Invalid email address',
     'invalid_username' => 'Invalid username',
     'fm_invalid_selection' => 'The %s field contains an invalid selection.',
+    'fm_disallowed' => 'You can only submit allowed or required fields.',
+    'fm_disallowed_log' => 'Attempted FreeMember submission with disallowed field'
 );
